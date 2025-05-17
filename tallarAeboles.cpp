@@ -16,7 +16,7 @@ struct Nodo {
 Nodo* crearNodo(char nombre[], int anio, char genero[], float dinero, Nodo* padre) {
     Nodo* nuevo = (Nodo*)malloc(sizeof(Nodo));
     strcpy(nuevo->nombre, nombre);
-    nuevo->año = anio;
+    nuevo->año = año;
     strcpy(nuevo->genero, genero);
     nuevo->dinero = dinero;
     nuevo->izq = NULL;
@@ -117,35 +117,21 @@ void mostrarFracasos(Nodo* arbol, Nodo* fracasos[], int& count) {
     mostrarFracasos(arbol->der, fracasos, count);
 }
 //eliminar un nodo del arbol
- void eliminarNodoPorNombre(nodo*& raiz, const char* nombre) {
+void eliminarNodoPorNombre(Nodo*& raiz, const char* nombre) {
     if (raiz == NULL) return;
 
-    if (strcmp(raiz->nombre, nombre) == 0){
+    if (strcmp(raiz->nombre, nombre) == 0) {
         // Caso 1: Nodo sin hijos
         if (raiz->izq == NULL && raiz->der == NULL) {
-            if (raiz->padre != NULL) {
-                if (raiz->padre->izq == raiz) {
-                    raiz->padre->izq = NULL;
-                } else {
-                    raiz->padre->der = NULL;
-                }
-            }
-           delete te riz;
+            free(raiz);
             raiz = NULL;
             return;
         }
         // Caso 2: Nodo con un hijo
         else if (raiz->izq == NULL || raiz->der == NULL) {
             Nodo* hijo = (raiz->izq != NULL) ? raiz->izq : raiz->der;
-            if (raiz->padre != NULL) {
-                if (raiz->padre->izq == raiz) {
-                    raiz->padre->izq = hijo;
-                } else {
-                    raiz->padre->der = hijo;
-                }
-            }
             hijo->padre = raiz->padre;
-          delete ete aiz;
+            free(raiz);
             raiz = hijo;
             return;
         }
@@ -161,18 +147,17 @@ void mostrarFracasos(Nodo* arbol, Nodo* fracasos[], int& count) {
             raiz->dinero = sucesor->dinero;
             eliminarNodoPorNombre(raiz->der, sucesor->nombre);
         }
-        
-    } else{
-       (eliminarNodoPorNombizqzq->izq, nombre);
-        (eliminarNodoPorNombrizqq->der, nombre);
-    }    
+    } else {
+        eliminarNodoPorNombre(raiz->izq, nombre);
+        eliminarNodoPorNombre(raiz->der, nombre);
+    }
 }
 // Función principal          
 int main() {
     Nodo* arbol = NULL;
     int opcion;
     char nombre[100], genero[20];
-    int anio;
+    int año;
     float dinero;
 
     do {
