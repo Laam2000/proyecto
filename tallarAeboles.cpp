@@ -9,10 +9,11 @@ struct Nodo {
     float dinero;
     Nodo* izq;
     Nodo* der;
+    Nodo *padre;
 };
 
 // Crear un nuevo nodo
-Nodo* crearNodo(char nombre[], int anio, char genero[], float dinero) {
+Nodo* crearNodo(char nombre[], int anio, char genero[], float dinero, Nodo* padre) {
     Nodo* nuevo = (Nodo*)malloc(sizeof(Nodo));
     strcpy(nuevo->nombre, nombre);
     nuevo->año = anio;
@@ -20,20 +21,22 @@ Nodo* crearNodo(char nombre[], int anio, char genero[], float dinero) {
     nuevo->dinero = dinero;
     nuevo->izq = NULL;
     nuevo->der = NULL;
+    nuevo->padre = padre;
     return nuevo;
 }
 
 // Insertar nodo
-void insertarNodo(Nodo*& arbol, char nombre[], int año, char genero[], float dinero) {
+void insertarNodo(Nodo*& arbol, char nombre[], int año, char genero[], float dinero, Nodo* padre) {
     if (arbol == NULL) {
-        arbol = crearNodo(nombre, año, genero, dinero);
+        arbol = crearNodo(nombre, año, genero, dinero, padre);
     } else {
         if (año < arbol->año) {
-            insertarNodo(arbol->izq, nombre, año, genero, dinero);
+            insertarNodo(arbol->izq, nombre, año, genero, dinero, arbol);
         } else if (año == arbol->año) {
-            insertarNodo(arbol->izq, nombre, año, genero, dinero); // regla especial
+            cout << "el año ingresado ya existe  " << año << " ingrese otro:" << endl;
+            return; 
         } else {
-            insertarNodo(arbol->der, nombre, año, genero, dinero);
+            insertarNodo(arbol->der, nombre, año, genero, dinero, arbol);
         }
     }
 }
@@ -113,7 +116,58 @@ void mostrarFracasos(Nodo* arbol, Nodo* fracasos[], int& count) {
 
     mostrarFracasos(arbol->der, fracasos, count);
 }
+//eliminar un nodo del arbol
+ void eliminarNodoPorNombre(nodo*& raiz, const char* nombre) {
+    if (raiz == NULL) return;
 
+    if (strcmp(raiz->nombre, nombre) == 0){
+        // Caso 1: Nodo sin hijos
+        if (raiz->izq == NULL && raiz->der == NULL) {
+            if (raiz->padre != NULL) {
+                if (raiz->padre->izq == raiz) {
+                    raiz->padre->izq = NULL;
+                } else {
+                    raiz->padre->der = NULL;
+                }
+            }
+           delete te riz;
+            raiz = NULL;
+            return;
+        }
+        // Caso 2: Nodo con un hijo
+        else if (raiz->izq == NULL || raiz->der == NULL) {
+            Nodo* hijo = (raiz->izq != NULL) ? raiz->izq : raiz->der;
+            if (raiz->padre != NULL) {
+                if (raiz->padre->izq == raiz) {
+                    raiz->padre->izq = hijo;
+                } else {
+                    raiz->padre->der = hijo;
+                }
+            }
+            hijo->padre = raiz->padre;
+          delete ete aiz;
+            raiz = hijo;
+            return;
+        }
+        // Caso 3: Nodo con dos hijos
+        else {
+            Nodo* sucesor = raiz->der;
+            while (sucesor->izq != NULL) {
+                sucesor = sucesor->izq;
+            }
+            strcpy(raiz->nombre, sucesor->nombre);
+            raiz->año = sucesor->año;
+            strcpy(raiz->genero, sucesor->genero);
+            raiz->dinero = sucesor->dinero;
+            eliminarNodoPorNombre(raiz->der, sucesor->nombre);
+        }
+        
+    } else{
+       (eliminarNodoPorNombizqzq->izq, nombre);
+        (eliminarNodoPorNombrizqq->der, nombre);
+    }    
+}
+// Función principal          
 int main() {
     Nodo* arbol = NULL;
     int opcion;
@@ -128,8 +182,8 @@ int main() {
         cout << "3. Mostrar en Preorden\n";
         cout << "4. Mostrar en Posorden\n";
         cout << "5. Buscar película por nombre\n";
-        cout << "6. Mostrar películas por género\n";
-        cout << "7. Mostrar 3 fracasos taquilleros\n";
+       cout << "6. Mostrar 3 fracasos taquilleros\n";
+        cout << "7.eliminar pelicula \n";
         cout << "8. Salir\n";
         cout << "Opción: ";
         cin >> opcion;
@@ -140,13 +194,13 @@ int main() {
                 cout << "Nombre: ";
                 cin.getline(nombre, 100);
                 cout << "Año: ";
-                cin >> anio;
+                cin >>  anio;
                 cin.ignore();
                 cout << "Género: ";
                 cin.getline(genero, 20);
                 cout << "Dinero recaudado (millones): ";
                 cin >> dinero;
-                insertarNodo(arbol, nombre, anio, genero, dinero);
+                insertarNodo(arbol, nombre, anio, genero, dinero, NULL);
                 break;
             case 2:
                 cout << "\nRecorrido Inorden:\n";
@@ -166,13 +220,8 @@ int main() {
                 cin.getline(nombre, 100);
                 buscarPorNombre(arbol, nombre);
                 break;
-           /*case 6:
-                cout << "Género a mostrar: ";
-                cin.ignore();
-                cin.getline(genero, 20);
-                mostrarPorGenero(arbol, genero);
-                break;*/ 
-            case 7: {
+         
+            case 6: {
                 Nodo* fracasos[3] = {NULL, NULL, NULL};
                 int count = 0;
                 mostrarFracasos(arbol, fracasos, count);
@@ -184,7 +233,18 @@ int main() {
                     }
                 }
                 break;
-            }
+            } 
+            case 7:
+                cout << "Nombre de la película a eliminar: ";
+                cin.ignore();
+                cin.getline(nombre, 100);
+                eliminarNodoPorNombre(arbol, nombre);
+                if (arbol == NULL) {
+                    cout << "Película no encontrada.\n";
+
+                    break;
+                }
+                cout << "Película eliminada.\n";
             case 8:
                 cout << "Saliendo...\n";
                 break;
@@ -192,7 +252,7 @@ int main() {
                 cout << "Opción no válida.\n";
         }
 
-    } while (opcion != 8);
+    } while (opcion != 9);
 
     return 0;
 }
