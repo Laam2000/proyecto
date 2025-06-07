@@ -1,5 +1,6 @@
 #include <iostream>
-#include <cstring>  //   strcmp
+#include <cstring>  // strcmp
+#include <stdlib.h>
 using namespace std;
 
 struct Nodo {
@@ -7,9 +8,10 @@ struct Nodo {
     int año;
     char genero[20];
     float dinero;
-    Nodo* izq;
+    Nodo* izq;    
     Nodo* der;
     Nodo *padre;
+    int altura;   
 };
 
 // Crear un nuevo nodo
@@ -22,23 +24,26 @@ Nodo* crearNodo(char nombre[], int año, char genero[], float dinero, Nodo* padr
     nuevo->izq = NULL;
     nuevo->der = NULL;
     nuevo->padre = padre;
-    nuevo-> altura = 1; // inicializa la altura del nodo hoja
+    nuevo->altura = 1; // inicializa la altura del nodo hoja
     return nuevo;
 }
+
 // Función para obtener la altura de un nodo
-int getAltura(nodo* nodo){
+int getAltura(Nodo* nodo){ 
     return nodo ? nodo->altura : 0;
 }
 
- int getBalane(Nodo* nodo) {
+int getBalance(Nodo* nodo) { 
     if (!nodo) return 0;
-    return alturaHoja(nodo->izq) - alturaHoja(nodo->der);
- }
+    return getAltura(nodo->izq) - getAltura(nodo->der); 
+}
+
 void actualizarAltura(Nodo* nodo) {
     if (nodo) {
-        nodo->altura = 1 + max(alturaHoja(nodo->izq), altura(nodo->der));
+        nodo->altura = 1 + max(getAltura(nodo->izq), getAltura(nodo->der));  
     }
 }
+
 // Función para rotar a la derecha
 Nodo* rotarDerecha(Nodo* y) {
     Nodo* x = y->izq;
@@ -54,6 +59,7 @@ Nodo* rotarDerecha(Nodo* y) {
 
     return x; // Nueva raíz
 }
+
 // Función para rotar a la izquierda
 Nodo* rotarIzquierda(Nodo* x) {
     Nodo* y = x->der;
@@ -69,6 +75,7 @@ Nodo* rotarIzquierda(Nodo* x) {
 
     return y; // Nueva raíz
 }
+
 // Insertar nodo
 Nodo* insertarAVL(Nodo* nodo, char nombre[], int año, char genero[], float dinero, Nodo* padre) {
     if (nodo == NULL) {
@@ -85,7 +92,7 @@ Nodo* insertarAVL(Nodo* nodo, char nombre[], int año, char genero[], float dine
     }
 
     actualizarAltura(nodo);
-    int balance =  getBalane(nodo);
+    int balance = getBalance(nodo);  
 
     // Casos de desbalance
     if (balance > 1 && año < nodo->izq->año)
@@ -106,9 +113,6 @@ Nodo* insertarAVL(Nodo* nodo, char nombre[], int año, char genero[], float dine
 
    return nodo;
 }
-        
-    
-
 
 // Recorridos
 void inorden(Nodo* arbol) {
@@ -138,11 +142,11 @@ void posorden(Nodo* arbol) {
     }
 }
 
-//Buscar película por nombre
+// Buscar película por nombre
 void buscarPorNombre(Nodo* arbol, const char* nombre) {
-    if (arbol == NULL) return ;
+    if (arbol == NULL) return;
 
-    if (strcmp(arbol->nombre, nombre) != 0) {
+    if (strcmp(arbol->nombre, nombre) == 0) {
         cout << "Película encontrada:\n";
         cout << "Nombre: " << arbol->nombre << ", Año: " << arbol->año
              << ", Género: " << arbol->genero << ", Dinero: $" << arbol->dinero << "M" << endl;
@@ -185,8 +189,9 @@ void mostrarFracasos(Nodo* arbol, Nodo* fracasos[], int& count) {
 
     mostrarFracasos(arbol->der, fracasos, count);
 }
-//eliminar un nodo del arbol
- void eliminarNodoPorNombre(Nodo*& raiz, const char* nombre) {
+
+// Eliminar un nodo del árbol
+void eliminarNodoPorNombre(Nodo*& raiz, const char* nombre) {
     if (raiz == NULL) return;
 
     if (strcmp(raiz->nombre, nombre) == 0) {
@@ -221,6 +226,7 @@ void mostrarFracasos(Nodo* arbol, Nodo* fracasos[], int& count) {
         eliminarNodoPorNombre(raiz->der, nombre);
     }
 }
+
 // Función principal          
 int main() {
     Nodo* arbol = NULL;
@@ -236,8 +242,8 @@ int main() {
         cout << "3. Mostrar en Preorden\n";
         cout << "4. Mostrar en Posorden\n";
         cout << "5. Buscar película por nombre\n";
-       cout << "6. Mostrar 3 fracasos taquilleros\n";
-        cout << "7.eliminar pelicula \n";
+        cout << "6. Mostrar 3 fracasos taquilleros\n";
+        cout << "7. Eliminar película\n";
         cout << "8. Salir\n";
         cout << "Opción: ";
         cin >> opcion;
@@ -248,13 +254,13 @@ int main() {
                 cout << "Nombre: ";
                 cin.getline(nombre, 100);
                 cout << "Año: ";
-                cin >>  año;
+                cin >> año;
                 cin.ignore();
                 cout << "Género: ";
                 cin.getline(genero, 20);
                 cout << "Dinero recaudado (millones): ";
                 cin >> dinero;
-                 insertarAVL(arbol, nombre, año, genero, dinero, NULL);
+                arbol = insertarAVL(arbol, nombre, año, genero, dinero, NULL);  
                 break;
             case 2:
                 cout << "\nRecorrido Inorden:\n";
@@ -270,7 +276,6 @@ int main() {
                 break;
             case 5:
                 cout << "Nombre de la película a buscar: ";
-                cin.ignore();
                 cin.getline(nombre, 100);
                 buscarPorNombre(arbol, nombre);
                 break;
@@ -290,15 +295,10 @@ int main() {
             } 
             case 7:
                 cout << "Nombre de la película a eliminar: ";
-                cin.ignore();
                 cin.getline(nombre, 100);
                 eliminarNodoPorNombre(arbol, nombre);
-                if (arbol == NULL) {
-                    cout << "Película no encontrada.\n";
-
-                    break;
-                }
-                cout << "Película eliminada.\n";
+                cout << "Película eliminada (si existía).\n";
+                break;  
             case 8:
                 cout << "Saliendo...\n";
                 break;
@@ -306,7 +306,7 @@ int main() {
                 cout << "Opción no válida.\n";
         }
 
-    } while (opcion != 9);
+    } while (opcion != 8); 
 
     return 0;
 }
